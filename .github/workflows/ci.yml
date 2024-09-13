@@ -74,7 +74,7 @@ jobs:
             coverageTable += `| ${category} | ${percentage}% | ${data.covered} | ${data.total} |\n`;
           }
           
-          const comment = `## Test Coverage Report\n\n${coverageTable}\n\nLast updated: ${new Date().toUTCString()}`;
+          const comment = `## 📊 Test Coverage Report\n\n${coverageTable}\n\nLast updated: ${new Date().toUTCString()}`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,

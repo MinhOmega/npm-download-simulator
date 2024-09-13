@@ -66,24 +66,15 @@ jobs:
           const fs = require('fs');
           const coverageData = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
           
-          let coverageTable = '| File | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |\n';
-          coverageTable += '|------|---------|----------|---------|---------|-------------------|\n';
+          let coverageTable = '| Category | Percentage | Covered | Total |\n';
+          coverageTable += '|-----------|------------|---------|-------|\n';
           
-          for (const [file, data] of Object.entries(coverageData)) {
-            if (file !== 'total') {
-              const stmts = data.statements.pct.toFixed(2);
-              const branch = data.branches.pct.toFixed(2);
-              const funcs = data.functions.pct.toFixed(2);
-              const lines = data.lines.pct.toFixed(2);
-              const uncovered = Array.isArray(data.lines.skipped) ? data.lines.skipped.join(',') : '-';
-              coverageTable += `| ${file} | ${stmts}% | ${branch}% | ${funcs}% | ${lines}% | ${uncovered} |\n`;
-            }
+          for (const [category, data] of Object.entries(coverageData.total)) {
+            const percentage = data.pct.toFixed(2);
+            coverageTable += `| ${category} | ${percentage}% | ${data.covered} | ${data.total} |\n`;
           }
           
-          const totalCoverage = coverageData.total;
-          coverageTable += `| All files | ${totalCoverage.statements.pct.toFixed(2)}% | ${totalCoverage.branches.pct.toFixed(2)}% | ${totalCoverage.functions.pct.toFixed(2)}% | ${totalCoverage.lines.pct.toFixed(2)}% | - |\n`;
-          
-          const comment = `## Test Coverage Report\n\n\`\`\`\n${coverageTable}\n\`\`\`\n\nLast updated: ${new Date().toUTCString()}`;
+          const comment = `## Test Coverage Report\n\n${coverageTable}\n\nLast updated: ${new Date().toUTCString()}`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,

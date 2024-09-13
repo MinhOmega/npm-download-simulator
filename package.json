@@ -40,7 +40,8 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testPathIgnorePatterns": ["<rootDir>/(coverage|lib).*/"]
+    "testPathIgnorePatterns": ["<rootDir>/(coverage|lib).*/"],
+    "coverageReporters": ["json-summary", "text", "lcov"]
   },
   "bin": {
     "npm-download-simulator": "./lib/src/cli.js"

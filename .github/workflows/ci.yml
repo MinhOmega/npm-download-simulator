@@ -63,11 +63,31 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |
+          const fs = require('fs');
+          const coverageData = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+          
+          let coverageTable = '| File | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s |\n';
+          coverageTable += '|------|---------|----------|---------|---------|-------------------|\n';
+          
+          for (const [file, data] of Object.entries(coverageData)) {
+            if (file !== 'total') {
+              const stmts = data.statements.pct.toFixed(2);
+              const branch = data.branches.pct.toFixed(2);
+              const funcs = data.functions.pct.toFixed(2);
+              const lines = data.lines.pct.toFixed(2);
+              const uncovered = data.lines.skipped.join(',') || '-';
+              coverageTable += `| ${file} | ${stmts}% | ${branch}% | ${funcs}% | ${lines}% | ${uncovered} |\n`;
+            }
+          }
+          
+          const totalCoverage = coverageData.total;
+          coverageTable += `| All files | ${totalCoverage.statements.pct.toFixed(2)}% | ${totalCoverage.branches.pct.toFixed(2)}% | ${totalCoverage.functions.pct.toFixed(2)}% | ${totalCoverage.lines.pct.toFixed(2)}% | - |\n`;
+          
+          const comment = `## Test Coverage Report\n\n\`\`\`\n${coverageTable}\n\`\`\`\n\nLast updated: ${new Date().toUTCString()}`;
+          
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `📊 Test Coverage: ${process.env.COVERAGE}%`
-          })
-      env:
-        COVERAGE: ${{ steps.coverage.outputs.coverage }}
+            body: comment
+          });

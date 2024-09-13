@@ -1,37 +1,64 @@
 import prompts from "prompts";
+import { getPackageName, getNumberOfDownloads, getMaxConcurrentDownloads, getDownloadTimeout, getConfigFromCli } from "./prompts";
+import { Config } from "../models/config.model";
 
-import { getConfigFromCli, getDownloadTimeout, getMaxConcurrentDownloads, getNumberOfDownloads, getPackageName } from "./prompts";
+// Mock the prompts module
+jest.mock("prompts");
+const mockPrompts = prompts as jest.MockedFunction<typeof prompts>;
 
 describe("cli prompts", () => {
-  it("getPackageName() returns the provided package name", async () => {
-    prompts.inject(["code-review-leaderboard"]);
-    expect(await getPackageName()).toEqual("code-review-leaderboard");
+  beforeEach(() => {
+    jest.resetAllMocks();
   });
 
-  it("getNumberOfDownloads() returns the provided package name", async () => {
-    prompts.inject([1000]);
-    expect(await getNumberOfDownloads()).toEqual(1000);
+  describe("getPackageName", () => {
+    it("should return the package name when prompted", async () => {
+      mockPrompts.mockResolvedValue({ value: "test-package" });
+      const result = await getPackageName();
+      expect(result).toBe("test-package");
+    });
   });
 
-  it("getNumberOfDownloads() returns the provided package name", async () => {
-    prompts.inject([400]);
-    expect(await getMaxConcurrentDownloads()).toEqual(400);
+  describe("getNumberOfDownloads", () => {
+    it("should return the number of downloads when prompted", async () => {
+      mockPrompts.mockResolvedValue({ value: 1000 });
+      const result = await getNumberOfDownloads();
+      expect(result).toBe(1000);
+    });
   });
 
-  it("getNumberOfDownloads() returns the provided package name", async () => {
-    prompts.inject([3000]);
-    expect(await getDownloadTimeout()).toEqual(3000);
+  describe("getMaxConcurrentDownloads", () => {
+    it("should return the max concurrent downloads when prompted", async () => {
+      mockPrompts.mockResolvedValue({ value: 300 });
+      const result = await getMaxConcurrentDownloads();
+      expect(result).toBe(300);
+    });
   });
 
-  it("returns a config based on the provided values", async () => {
-    prompts.inject(["code-review-leaderboard", 1000, 400, 3000]);
+  describe("getDownloadTimeout", () => {
+    it("should return the download timeout when prompted", async () => {
+      mockPrompts.mockResolvedValue({ value: 3000 });
+      const result = await getDownloadTimeout();
+      expect(result).toBe(3000);
+    });
+  });
 
-    const config = await getConfigFromCli();
-    expect(config).toEqual({
-      packageName: "code-review-leaderboard",
-      numDownloads: 1000,
-      maxConcurrentDownloads: 400,
-      downloadTimeout: 3000,
+  describe("getConfigFromCli", () => {
+    it("should return a complete config object when all prompts are answered", async () => {
+      mockPrompts.mockResolvedValueOnce({ value: "test-package" })
+        .mockResolvedValueOnce({ value: 1000 })
+        .mockResolvedValueOnce({ value: 300 })
+        .mockResolvedValueOnce({ value: 3000 });
+
+      const expectedConfig: Config = {
+        packageName: "test-package",
+        numDownloads: 1000,
+        maxConcurrentDownloads: 300,
+        downloadTimeout: 3000,
+      };
+
+      const result = await getConfigFromCli();
+      expect(result).toEqual(expectedConfig);
     });
   });
 });

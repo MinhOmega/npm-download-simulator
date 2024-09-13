@@ -75,7 +75,7 @@ jobs:
               const branch = data.branches.pct.toFixed(2);
               const funcs = data.functions.pct.toFixed(2);
               const lines = data.lines.pct.toFixed(2);
-              const uncovered = data.lines.skipped.join(',') || '-';
+              const uncovered = Array.isArray(data.lines.skipped) ? data.lines.skipped.join(',') : '-';
               coverageTable += `| ${file} | ${stmts}% | ${branch}% | ${funcs}% | ${lines}% | ${uncovered} |\n`;
             }
           }
